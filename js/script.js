@@ -1,58 +1,145 @@
 // ROUTES
 const global = {
-    currentPage: window.location.pathname
+    currentPage: window.location.pathname,
+};
+
+
+// Display 20 most popular movies
+async function displayPopularMovies() {
+    const { results } = await fetchAPIDATA("movie/popular");
+    console.log(results);
+    results.forEach((movie) => {
+        const div = document.createElement("div");
+
+        div.classList.add("card");
+        div.innerHTML = ` 
+          <a href="movie-details.html?id=${movie.id}">
+            ${movie.poster_path
+                ? `<img
+                    src="https://image.tmdb.org/t/p/w500${movie.poster_path}"
+                    class="card-img-top"
+                    alt=${movie.title}/>`
+                :
+                `<img
+                    src="../images/no-image.jpg"
+                    class="card-img-top"
+                    alt==${movie.title}/>`
+            }
+          </a>
+          <div class="card-body">
+            <h5 class="card-title">${movie.title}</h5>
+            <p class="card-text">
+              <small class="text-muted">Release: ${movie.release_date}</small>
+            </p>
+          </div> `;
+        console.log(div)
+        document.querySelector('#popular-movies').appendChild(div)
+    });
 }
 
 
-async function displayPopularMovies() {
-    const results = fetchAPIDATA('movie/popular');
-    console.log(results)
+// Display 20 most popular TV Shows
+async function displayPopularShows() {
+    const { results } = await fetchAPIDATA("tv/popular");
+    console.log(results);
+    results.forEach((show) => {
+        const div = document.createElement("div");
+
+        div.classList.add("card");
+        div.innerHTML = ` 
+          <a href="tv-details.html?id=${show.id}">
+            ${show.poster_path
+                ? `<img
+                    src="https://image.tmdb.org/t/p/w500${show.poster_path}"
+                    class="card-img-top"
+                    alt=${show.name}/>`
+                :
+                `<img
+                    src="../images/no-image.jpg"
+                    class="card-img-top"
+                    alt==${show.name}/>`
+            }
+          </a>
+          <div class="card-body">
+            <h5 class="card-title">${show.name}</h5>
+            <p class="card-text">
+              <small class="text-muted">Air Date: ${show.first_air_date}</small>
+            </p>
+          </div> `;
+        console.log(div)
+        document.querySelector('#popular-shows').appendChild(div)
+    });
+}
+
+// Display Movie Details
+async function displayMovieDetails() {
+    const movieID = window.location.search.split('=')[1];
+
+    const movie = await fetchAPIDATA(`movie/${movieID}`);
+
+    const div = document.createElement('div');
+
+    div.innerHTML = ``
+
 }
 
 // Fetch Data from TMDB API
 async function fetchAPIDATA(endpoint) {
-    const API_KEY = '59cac757600febcc5ead8e460dd554c2';
-    const API_URL = 'https://api.themoviedb.org/3/'
+    const API_KEY = "59cac757600febcc5ead8e460dd554c2";
+    const API_URL = "https://api.themoviedb.org/3/";
 
-    const response = await fetch(`${API_URL}${endpoint}?api_key=${API_KEY}&language=en-US`);
+    showSpinner();
+
+    const response = await fetch(
+        `${API_URL}${endpoint}?api_key=${API_KEY}&language=en-US`
+    );
 
     const data = await response.json();
+
+    hideSpinner();
 
     return data;
 }
 
+function showSpinner() {
+    document.querySelector('.spinner').classList.add('show');
+}
+
+function hideSpinner() {
+    document.querySelector('.spinner').classList.remove('show');
+}
+
 // Highlight ACtive Link
 function highlightActiveLink() {
-    const links = document.querySelectorAll('.nav-link');
+    const links = document.querySelectorAll(".nav-link");
     links.forEach((link) => {
-        if (link.getAttribute('href') === global.currentPage) {
-            link.classList.add('active')
+        if (link.getAttribute("href") === global.currentPage) {
+            link.classList.add("active");
         }
-    })
+    });
 }
 
 // Init Application
 function init() {
     switch (global.currentPage) {
-        case '/':
-        case '/index.html':
+        case "/":
+        case "/index.html":
             displayPopularMovies();
             break;
-        case '/show.html':
-            console.log('Shows');
+        case "/shows.html":
+            displayPopularShows();
             break;
-        case '/movie-details.html':
-            console.log('Movie Details');
+        case "/movie-details.html":
+            displayMovieDetails()
             break;
-        case '/tv-details.html':
-            console.log('TV Details');
+        case "/tv-details.html":
+            console.log("TV Details");
             break;
-        case '/search.html':
-            console.log('Search');
+        case "/search.html":
+            console.log("Search");
             break;
     }
-    highlightActiveLink()
+    highlightActiveLink();
 }
 
-
-document.addEventListener('DOMContentLoaded', init)
+document.addEventListener("DOMContentLoaded", init);
